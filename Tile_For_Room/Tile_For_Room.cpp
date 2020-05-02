@@ -3,6 +3,7 @@
 #include "Graph.h"
 #include <FL/fl_ask.H>
 #include <FL/fl_draw.H>
+#include <math.h>
 
 class Room {
 public:
@@ -50,8 +51,8 @@ int hor_okr_lenght(const Room& room, const Tile& tile) {
 
 	double tile_length_with_seam = tile.tile_length + tile.seam;
 	double amount_horizontal = room.length / tile_length_with_seam;
-
-	int okr_amount_hor_length = int(amount_horizontal + 0.5);
+	
+	int okr_amount_hor_length = int(ceil(amount_horizontal));
 
 	return okr_amount_hor_length;
 }
@@ -61,7 +62,7 @@ int hor_okr_width(const Room& room, const Tile& tile) {
 	double tile_width_with_seam = tile.tile_width + tile.seam;
 	double amount_horizontal = room.width / tile_width_with_seam;
 
-	int okr_amount_hor_width = int(amount_horizontal + 0.5);
+	int okr_amount_hor_width = int(ceil(amount_horizontal));
 
 	return okr_amount_hor_width;
 }
@@ -71,7 +72,7 @@ int ver_okr_lenght(const Room& room, const Tile& tile) {
 	double tile_length_with_seam = tile.tile_width + tile.seam;
 	double amount_horizontal = room.length / tile_length_with_seam;
 
-	int okr_amount_ver_length = int(amount_horizontal + 0.5);
+	int okr_amount_ver_length = int(ceil(amount_horizontal));
 
 	return okr_amount_ver_length;
 }
@@ -81,7 +82,7 @@ int ver_okr_width(const Room& room, const Tile& tile) {
 	double tile_length_with_seam = tile.tile_length + tile.seam;
 	double amount_horizontal = room.width / tile_length_with_seam;
 
-	int okr_amount_ver_width = int(amount_horizontal + 0.5);
+	int okr_amount_ver_width = int(ceil(amount_horizontal));
 
 	return okr_amount_ver_width;
 }
