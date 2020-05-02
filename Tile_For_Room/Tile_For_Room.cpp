@@ -69,8 +69,8 @@ int hor_okr_width(const Room& room, const Tile& tile) {
 
 int ver_okr_lenght(const Room& room, const Tile& tile) {
 
-	double tile_length_with_seam = tile.tile_width + tile.seam;
-	double amount_horizontal = room.length / tile_length_with_seam;
+	double tile_width_with_seam = tile.tile_width + tile.seam;
+	double amount_horizontal = room.length / tile_width_with_seam;
 
 	int okr_amount_ver_length = int(ceil(amount_horizontal));
 
@@ -106,6 +106,7 @@ int tile_amount_vertical(const Room& room, const Tile&  tile) {
 	int vertical_answer = ver_okr_lenght(room, tile) * ver_okr_width(room, tile);
 	return vertical_answer;
 }
+
 //Window class
 struct Room_with_tile_window : Window
 {
@@ -141,14 +142,14 @@ private:
 	Button vertical_result_button;
 
 	void horizontal_result_pressed()
-	{	
+	{
 		result();
 		tile_amount.show();
 		all_tile_cost.show();
 	}
 
 	void vertical_result_pressed()
-	{	
+	{
 		result2();
 		tile_amount.show();
 		all_tile_cost.show();
@@ -168,22 +169,23 @@ private:
 	{
 		hide();
 	}
-	
-	void draw(int par)
+
+	void draw(int par, double seam_d)
 	{
 		int tlx2 = 10;
 		int tly2 = 60;
+
+		int tileL2 = int(tile.tile_length * 100);
+		int tileW2 = int(tile.tile_width * 100);
+		int seam2 = int(seam_d * 100);
 		//drawing for horizontal tile orientation
-		if (par == 1) 
+		if (par == 1)
 		{
 			int numOfColumns = hor_okr_lenght(room, tile);
 			int numOfRows = hor_okr_width(room, tile);
 
 			int numOfSquares = numOfColumns * numOfRows;
-
-			int tileL2 = int(tile.tile_length * 100);
-			int tileW2 = int(tile.tile_width * 100);
-
+			
 			vector<Graph_lib::Rectangle*> vr;
 			vr.clear();
 			vr.reserve(numOfSquares);
@@ -191,7 +193,10 @@ private:
 			{
 				for (int j = 0; j < numOfRows; ++j)
 				{
-					Graph_lib::Rectangle* r = new Graph_lib::Rectangle(Point(10 + tileL2 * i, 60 + tileW2 * j), tileL2, tileW2);
+					int x = tileL2 * i + seam2 + 10;
+					int y = tileW2 * j + seam2 + 60;
+
+					Graph_lib::Rectangle* r = new Graph_lib::Rectangle(Point(x, y), tileL2, tileW2);
 					// fill the consequtive squares with white or green color
 					if ((i + j) % 2 == 0)
 					{
@@ -204,15 +209,12 @@ private:
 			for (size_t k = 0; k < vr.size(); ++k) attach(*vr[k]);
 		}
 		//drawing for vertical tile orientation
-		if(par==2)
+		if (par == 2)
 		{
 			int numOfColumns = ver_okr_lenght(room, tile);
 			int numOfRows = ver_okr_width(room, tile);
 
 			int numOfSquares = numOfColumns * numOfRows;
-
-			int tileL2 = int(tile.tile_width * 100);
-			int tileW2 = int(tile.tile_length * 100);
 
 			vector<Graph_lib::Rectangle*> vr;
 			vr.clear();
@@ -221,10 +223,12 @@ private:
 			{
 				for (int j = 0; j < numOfRows; ++j)
 				{
-					Graph_lib::Rectangle* r = new Graph_lib::Rectangle(Point(10 + tileL2 * i, 60 + tileW2 * j), tileL2, tileW2);
+					int x = tileW2 * i + seam2 + 10;
+					int y = tileL2 * j + seam2 + 60;
+					Graph_lib::Rectangle* r = new Graph_lib::Rectangle(Point(x, y), tileW2, tileL2);
 					// fill the consequtive squares with white or green color
-					if ((i + j) % 2 == 0) 
-					{ 
+					if ((i + j) % 2 == 0)
+					{
 						r->set_fill_color(Color::dark_green);
 					}
 					else r->set_color(Color::white);
@@ -232,7 +236,7 @@ private:
 				}
 			}
 			for (size_t k = 0; k < vr.size(); ++k) attach(*vr[k]);
-		}				
+		}
 	}
 	//after click horizontal button
 	void result()
@@ -244,17 +248,17 @@ private:
 		string t_width = tile_width_box.get_string();
 		string t_seam = tile_seam_box.get_string();
 		string t_cost = tile_cost_box.get_string();
-				
+
 		room.room_data(r_length, r_width);
 		tile.enter_tile_data(t_length, t_width, t_seam, t_cost);
-				
+
 		double hor_tile_cost;
 		hor_tile_cost = tile_amount_horizontal(room, tile) * tile.cost;
 
 		ostringstream ss1;
 		ss1 << room.square_room() << "m2;";
 		room_square_out.put(ss1.str());
-		
+
 		ostringstream ss2;
 		ss2 << tile_amount_horizontal(room, tile) << ';';
 		tile_amount.put(ss2.str());
@@ -262,10 +266,12 @@ private:
 		ostringstream ss3;
 		ss3 << hor_tile_cost << '$';
 		all_tile_cost.put(ss3.str());
-		draw(1);
+
+		draw(1, tile.seam);
 
 		redraw();
 	}
+
 	//after click vertical button
 	void result2()
 	{
@@ -294,7 +300,8 @@ private:
 		ostringstream ss3;
 		ss3 << ver_tile_cost << '$';
 		all_tile_cost.put(ss3.str());
-		draw(2);
+		
+		draw(2, tile.seam);
 
 		redraw();
 	}
