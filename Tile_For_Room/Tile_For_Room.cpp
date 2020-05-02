@@ -191,7 +191,7 @@ private:
 				for (int j = 0; j < numOfRows; ++j)
 				{
 					Graph_lib::Rectangle* r = new Graph_lib::Rectangle(Point(10 + tileL2 * i, 60 + tileW2 * j), tileL2, tileW2);
-					// fill the consequtive squares with white or red color
+					// fill the consequtive squares with white or green color
 					if ((i + j) % 2 == 0)
 					{
 						r->set_fill_color(Color::dark_green);
@@ -221,7 +221,7 @@ private:
 				for (int j = 0; j < numOfRows; ++j)
 				{
 					Graph_lib::Rectangle* r = new Graph_lib::Rectangle(Point(10 + tileL2 * i, 60 + tileW2 * j), tileL2, tileW2);
-					// fill the consequtive squares with white or red color
+					// fill the consequtive squares with white or green color
 					if ((i + j) % 2 == 0) 
 					{ 
 						r->set_fill_color(Color::dark_green);
