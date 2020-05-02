@@ -2,6 +2,7 @@
 #include "Simple_window.h"
 #include "Graph.h"
 #include <FL/fl_ask.H>
+#include <FL/fl_draw.H>
 
 class Room {
 public:
@@ -44,57 +45,77 @@ public:
 		return tile_length, tile_width, seam, cost, tile_square;
 	}
 };
+//fuctions to define amount horizontal and vertical tiles
+int hor_okr_lenght(const Room& room, const Tile& tile) {
 
-int tile_amount_vertical(const Room& room, const Tile&  tile) {
-	int vertical_answer;
+	double tile_length_with_seam = tile.tile_length + tile.seam;
+	double amount_horizontal = room.length / tile_length_with_seam;
 
+	int okr_amount_hor_length = int(amount_horizontal + 0.5);
+
+	return okr_amount_hor_length;
+}
+
+int hor_okr_width(const Room& room, const Tile& tile) {
+
+	double tile_width_with_seam = tile.tile_width + tile.seam;
+	double amount_horizontal = room.width / tile_width_with_seam;
+
+	int okr_amount_hor_width = int(amount_horizontal + 0.5);
+
+	return okr_amount_hor_width;
+}
+
+int ver_okr_lenght(const Room& room, const Tile& tile) {
+
+	double tile_length_with_seam = tile.tile_width + tile.seam;
+	double amount_horizontal = room.length / tile_length_with_seam;
+
+	int okr_amount_ver_length = int(amount_horizontal + 0.5);
+
+	return okr_amount_ver_length;
+}
+
+int ver_okr_width(const Room& room, const Tile& tile) {
+
+	double tile_length_with_seam = tile.tile_length + tile.seam;
+	double amount_horizontal = room.width / tile_length_with_seam;
+
+	int okr_amount_ver_width = int(amount_horizontal + 0.5);
+
+	return okr_amount_ver_width;
+}
+//define all horizontal amount tile in the room 
+int tile_amount_horizontal(const Room& room, const Tile& tile) {
 	if (room.length < tile.tile_length || room.width < tile.tile_width || room.width < tile.tile_length || room.length < tile.tile_width)
 	{
 		fl_choice("You entered wrong value! Please try again!", "OK", 0, 0);
 	}
-	double tile_length_with_seam = tile.tile_length + tile.seam;
-	double tile_width_with_seam = tile.tile_width + tile.seam;
+	int horizontal_answer = hor_okr_lenght(room, tile) * hor_okr_width(room, tile);
 
-	double amount_vertical = room.length / tile_length_with_seam;
-	double amount_horizontal = room.width / tile_width_with_seam;
-
-	//define a whole value
-	int okr_amount_ver = int(amount_vertical + 0.5);
-	int okr_amount_hor = int(amount_horizontal + 0.5);
-
-	vertical_answer = okr_amount_ver * okr_amount_hor;
-	return vertical_answer;
-}
-
-int tile_amount_horizontal(const Room& room, const Tile& tile) {
-	int horizontal_answer; 
-	
-	if (room.length < tile.tile_length || room.width < tile.tile_width || room.width < tile.tile_length || room.length < tile.tile_width) 
-	{
-		fl_choice("You entered wrong value! Please try again!", "OK", 0, 0);
-	}
-
-	double tile_length_with_seam = tile.tile_length + tile.seam;
-	double tile_width_with_seam = tile.tile_width + tile.seam;
-
-	double  amount_vertical = room.length / tile_width_with_seam;
-	double amount_horizontal = room.width / tile_length_with_seam;
-
-	//define a whole value
-	int okr_amount_ver = int(amount_vertical + 0.5);
-	int okr_amount_hor = int(amount_horizontal + 0.5);
-
-	horizontal_answer = okr_amount_ver * okr_amount_hor;
-	
 	return horizontal_answer;
 }
 
-//Window
-struct Room_with_tile_window : Window 
-{	
+//define all vertical amount tile in the room 
+int tile_amount_vertical(const Room& room, const Tile&  tile) {
+	if (room.length < tile.tile_length || room.width < tile.tile_width || room.width < tile.tile_length || room.length < tile.tile_width)
+	{
+		fl_choice("You entered wrong value! Please try again!", "OK", 0, 0);
+	}
+	int vertical_answer = ver_okr_lenght(room, tile) * ver_okr_width(room, tile);
+	return vertical_answer;
+}
+//Window class
+struct Room_with_tile_window : Window
+{
 	Room room;
 	Tile tile;
 	Room_with_tile_window(Point xy, int w, int h, const string& title);
+
+	int x_orig = 400; //Window center
+	int y_orig = 300;
+
+	Point orig{ x_orig, y_orig };
 
 	//Room in_box, out_box
 	In_box room_length_box;
@@ -117,16 +138,16 @@ private:
 	Button save_result;
 	Button open_from_file;
 	Button vertical_result_button;
-			
-	void horizontal_result_pressed() 
-	{
+
+	void horizontal_result_pressed()
+	{	
 		result();
 		tile_amount.show();
 		all_tile_cost.show();
 	}
 
 	void vertical_result_pressed()
-	{
+	{	
 		result2();
 		tile_amount.show();
 		all_tile_cost.show();
@@ -146,7 +167,73 @@ private:
 	{
 		hide();
 	}
+	
+	void draw(int par)
+	{
+		int tlx2 = 10;
+		int tly2 = 60;
+		//drawing for horizontal tile orientation
+		if (par == 1) 
+		{
+			int numOfColumns = hor_okr_lenght(room, tile);
+			int numOfRows = hor_okr_width(room, tile);
 
+			int numOfSquares = numOfColumns * numOfRows;
+
+			int tileL2 = int(tile.tile_length * 100);
+			int tileW2 = int(tile.tile_width * 100);
+
+			vector<Graph_lib::Rectangle*> vr;
+			vr.clear();
+			vr.reserve(numOfSquares);
+			for (int i = 0; i < numOfColumns; ++i)
+			{
+				for (int j = 0; j < numOfRows; ++j)
+				{
+					Graph_lib::Rectangle* r = new Graph_lib::Rectangle(Point(10 + tileL2 * i, 60 + tileW2 * j), tileL2, tileW2);
+					// fill the consequtive squares with white or red color
+					if ((i + j) % 2 == 0)
+					{
+						r->set_fill_color(Color::dark_green);
+					}
+					else r->set_color(Color::white);
+					vr.push_back(r);
+				}
+			}
+			for (size_t k = 0; k < vr.size(); ++k) attach(*vr[k]);
+		}
+		//drawing for vertical tile orientation
+		if(par==2)
+		{
+			int numOfColumns = ver_okr_lenght(room, tile);
+			int numOfRows = ver_okr_width(room, tile);
+
+			int numOfSquares = numOfColumns * numOfRows;
+
+			int tileL2 = int(tile.tile_width * 100);
+			int tileW2 = int(tile.tile_length * 100);
+
+			vector<Graph_lib::Rectangle*> vr;
+			vr.clear();
+			vr.reserve(numOfSquares);
+			for (int i = 0; i < numOfColumns; ++i)
+			{
+				for (int j = 0; j < numOfRows; ++j)
+				{
+					Graph_lib::Rectangle* r = new Graph_lib::Rectangle(Point(10 + tileL2 * i, 60 + tileW2 * j), tileL2, tileW2);
+					// fill the consequtive squares with white or red color
+					if ((i + j) % 2 == 0) 
+					{ 
+						r->set_fill_color(Color::dark_green);
+					}
+					else r->set_color(Color::white);
+					vr.push_back(r);
+				}
+			}
+			for (size_t k = 0; k < vr.size(); ++k) attach(*vr[k]);
+		}				
+	}
+	//after click horizontal button
 	void result()
 	{
 		string r_length = room_length_box.get_string();
@@ -164,7 +251,7 @@ private:
 		hor_tile_cost = tile_amount_horizontal(room, tile) * tile.cost;
 
 		ostringstream ss1;
-		ss1 << room.square_room() << ';';
+		ss1 << room.square_room() << "m2;";
 		room_square_out.put(ss1.str());
 		
 		ostringstream ss2;
@@ -174,10 +261,11 @@ private:
 		ostringstream ss3;
 		ss3 << hor_tile_cost << '$';
 		all_tile_cost.put(ss3.str());
+		draw(1);
 
 		redraw();
 	}
-
+	//after click vertical button
 	void result2()
 	{
 		string r_length = room_length_box.get_string();
@@ -195,7 +283,7 @@ private:
 		ver_tile_cost = tile_amount_vertical(room, tile) * tile.cost;
 
 		ostringstream ss1;
-		ss1 << room.square_room() << ';';
+		ss1 << room.square_room() << "m2;";
 		room_square_out.put(ss1.str());
 
 		ostringstream ss2;
@@ -205,8 +293,7 @@ private:
 		ostringstream ss3;
 		ss3 << ver_tile_cost << '$';
 		all_tile_cost.put(ss3.str());
-
-
+		draw(2);
 
 		redraw();
 	}
@@ -214,19 +301,19 @@ private:
 
 Room_with_tile_window::Room_with_tile_window(Point xy, int w, int h, const string& title)
 	: Window{ xy, w, h, title },
-	horizontal_result_button{ Point{x_max() - 70, 0}, 70, 20, "Hor_Result",
+	horizontal_result_button{ Point{x_max() - 70, 0}, 70, 20, "Horizontal",
 	[](Address, Address pw)
 		{
 			reference_to<Room_with_tile_window>(pw).horizontal_result_pressed();
 		}
 	},
-	vertical_result_button{ Point{x_max() - 70, 30}, 70, 20, "Ver_Result",
+	vertical_result_button{ Point{x_max() - 70, 30}, 70, 20, "Vertical",
 	[](Address, Address pw)
 		{
 			reference_to<Room_with_tile_window>(pw).vertical_result_pressed();
 		}
 	},
-	save_result{ Point{x_max() - 70, 60 }, 70, 20, "Save result",
+	save_result{ Point{x_max() - 70, 60 }, 70, 20, "Save",
 		[](Address, Address pw)
 		{
 			reference_to<Room_with_tile_window>(pw).save_button_pressed();
@@ -243,22 +330,19 @@ Room_with_tile_window::Room_with_tile_window(Point xy, int w, int h, const strin
 			{
 				reference_to<Room_with_tile_window>(pw).quit();
 			}
-	},
-		
-		room_square_out{ Point{x_max() -550, 0}, 100, 20, "Room Square:" },
-		room_length_box{ Point{x_max() - 400, 0 }, 50, 20, "Room length:" },
-		room_width_box{ Point{x_max() - 200, 0}, 50, 20, "Room width:" },
+	},		
+		room_square_out{ Point{x_max() -550, 0}, 80, 20, "Room Square:" },
+		room_length_box{ Point{x_max() -350, 0 }, 50, 20, "Room length, m:" },
+		room_width_box{ Point{x_max() - 200, 0}, 50, 20, "Room width, m:" },
 
-		tile_length_box{ Point{100, 30}, 50, 20, "Tile lenght:" },
-		tile_width_box{ Point{x_max() -550, 30}, 50, 20, "Tile width:" },
-		tile_seam_box{ Point{x_max() - 400, 30}, 50, 20, "Tile seam:" },
-		tile_cost_box{ Point{x_max() -200, 30}, 50, 20, "Tile cost:" },
-
-		//tile_square_out{ Point{x_max() -70, 120}, 50, 20, "Tile square:" },		
+		tile_length_box{ Point{100, 30}, 50, 20, "Tile lenght, m:" },
+		tile_width_box{ Point{x_max() -550, 30}, 50, 20, "Tile width, m:" },
+		tile_seam_box{ Point{x_max() - 350, 30}, 50, 20, "Tile seam, m:" },
+		tile_cost_box{ Point{x_max() -200, 30}, 50, 20, "Tile cost, $:" },
+	
 		tile_amount{ Point{x_max() -70, 180}, 50, 20, "Tile amount:" },
 		all_tile_cost{ Point{x_max() -70, 210}, 50, 20, "Tile cost:" }
-
-		{			
+		{		
 				//room
 				attach(room_length_box);
 				attach(room_width_box);
@@ -281,7 +365,6 @@ Room_with_tile_window::Room_with_tile_window(Point xy, int w, int h, const strin
 				attach(all_tile_cost);
 				all_tile_cost.hide();						 
 	}
-
 
 int main()
 {
