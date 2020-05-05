@@ -47,9 +47,9 @@ public:
 	}
 };
 //fuctions to define amount horizontal and vertical tiles
-int hor_okr_lenght(const Room& room, const Tile& tile) {
-
-	double tile_length_with_seam = tile.tile_length + tile.seam;
+int hor_okr_lenght(const Room& room, const Tile& tile) 
+{
+	double tile_length_with_seam = tile.tile_length + (tile.seam/1000);
 	double amount_horizontal = room.length / tile_length_with_seam;
 	
 	int okr_amount_hor_length = int(ceil(amount_horizontal));
@@ -57,9 +57,9 @@ int hor_okr_lenght(const Room& room, const Tile& tile) {
 	return okr_amount_hor_length;
 }
 
-int hor_okr_width(const Room& room, const Tile& tile) {
-
-	double tile_width_with_seam = tile.tile_width + tile.seam;
+int hor_okr_width(const Room& room, const Tile& tile) 
+{
+	double tile_width_with_seam = tile.tile_width + (tile.seam/1000);
 	double amount_horizontal = room.width / tile_width_with_seam;
 
 	int okr_amount_hor_width = int(ceil(amount_horizontal));
@@ -67,9 +67,9 @@ int hor_okr_width(const Room& room, const Tile& tile) {
 	return okr_amount_hor_width;
 }
 
-int ver_okr_lenght(const Room& room, const Tile& tile) {
-
-	double tile_width_with_seam = tile.tile_width + tile.seam;
+int ver_okr_lenght(const Room& room, const Tile& tile) 
+{
+	double tile_width_with_seam = tile.tile_width + (tile.seam/1000);
 	double amount_horizontal = room.length / tile_width_with_seam;
 
 	int okr_amount_ver_length = int(ceil(amount_horizontal));
@@ -77,9 +77,9 @@ int ver_okr_lenght(const Room& room, const Tile& tile) {
 	return okr_amount_ver_length;
 }
 
-int ver_okr_width(const Room& room, const Tile& tile) {
-
-	double tile_length_with_seam = tile.tile_length + tile.seam;
+int ver_okr_width(const Room& room, const Tile& tile) 
+{
+	double tile_length_with_seam = tile.tile_length + (tile.seam/1000);
 	double amount_horizontal = room.width / tile_length_with_seam;
 
 	int okr_amount_ver_width = int(ceil(amount_horizontal));
@@ -87,7 +87,8 @@ int ver_okr_width(const Room& room, const Tile& tile) {
 	return okr_amount_ver_width;
 }
 //define all horizontal amount tile in the room 
-int tile_amount_horizontal(const Room& room, const Tile& tile) {
+int tile_amount_horizontal(const Room& room, const Tile& tile) 
+{
 	if (room.length < tile.tile_length || room.width < tile.tile_width || room.width < tile.tile_length || room.length < tile.tile_width)
 	{
 		fl_choice("You entered wrong value! Please try again!", "OK", 0, 0);
@@ -170,33 +171,52 @@ private:
 		hide();
 	}
 
-	void draw(int par, double seam_d)
-	{
-		int tlx2 = 10;
-		int tly2 = 60;
+	vector<Graph_lib::Rectangle*> vr;
+	vector<Graph_lib::Rectangle*> vk;
 
-		int tileL2 = int(tile.tile_length * 100);
-		int tileW2 = int(tile.tile_width * 100);
-		int seam2 = int(seam_d * 100);
+	void draw(int par, double seam_d, double tile_d_l, double tile_d_w)
+	{	//set scale
+		double scale;
+
+		double scale_x = 600 / (room.length*100);
+		double scale_y = 500 / (room.width*100);
+
+		if (scale_x > scale_y)
+		{
+			scale = scale_y;
+		}
+		if (scale_x <= scale_y)
+		{
+			scale = scale_x;
+		}
+		//calculate tile draw values depending on the scale
+		int tile_draw_lenght = int(tile_d_l * 100 * scale);
+		int tile_draw_width = int(tile_d_w * 100 * scale);
+		int seam2 = int(seam_d/10 * scale);
+
 		//drawing for horizontal tile orientation
 		if (par == 1)
 		{
-			int numOfColumns = hor_okr_lenght(room, tile);
-			int numOfRows = hor_okr_width(room, tile);
+			int num_of_columns = hor_okr_lenght(room, tile);
+			int num_of_rows = hor_okr_width(room, tile);
 
-			int numOfSquares = numOfColumns * numOfRows;
-			
-			vector<Graph_lib::Rectangle*> vr;
+			int num_of_squares = num_of_columns * num_of_rows;
+
+			for (size_t k = 0; k < vk.size(); ++k) detach(*vk[k]);
+			for (size_t k = 0; k < vr.size(); ++k) detach(*vr[k]);
 			vr.clear();
-			vr.reserve(numOfSquares);
-			for (int i = 0; i < numOfColumns; ++i)
+			vr.reserve(num_of_squares);
+			for (int i = 0; i < num_of_columns; ++i)
 			{
-				for (int j = 0; j < numOfRows; ++j)
+				for (int j = 0; j < num_of_rows; ++j)
 				{
-					int x = tileL2 * i + seam2 + 10;
-					int y = tileW2 * j + seam2 + 60;
+					int x = ((tile_draw_lenght * i) + seam2 + 10);
+					int y = (tile_draw_width * j) + seam2 + 60;
 
-					Graph_lib::Rectangle* r = new Graph_lib::Rectangle(Point(x, y), tileL2, tileW2);
+					int x2 = (tile_draw_lenght *(1+i))+10;
+					int y2 = (tile_draw_width * (1+j))+60;
+
+					Graph_lib::Rectangle* r = new Graph_lib::Rectangle(Point{ x, y }, Point{ x2, y2});
 					// fill the consequtive squares with white or green color
 					if ((i + j) % 2 == 0)
 					{
@@ -206,36 +226,43 @@ private:
 					vr.push_back(r);
 				}
 			}
+
 			for (size_t k = 0; k < vr.size(); ++k) attach(*vr[k]);
 		}
 		//drawing for vertical tile orientation
 		if (par == 2)
 		{
-			int numOfColumns = ver_okr_lenght(room, tile);
-			int numOfRows = ver_okr_width(room, tile);
+			int num_of_columns = ver_okr_lenght(room, tile);
+			int num_of_rows = ver_okr_width(room, tile);
 
-			int numOfSquares = numOfColumns * numOfRows;
+			int num_of_squares = num_of_columns * num_of_rows;
+			
+			for (size_t k = 0; k < vr.size(); ++k) detach(*vr[k]);
+			for (size_t k = 0; k < vk.size(); ++k) detach(*vk[k]);
+			vk.clear();
+			vk.reserve(num_of_squares);
 
-			vector<Graph_lib::Rectangle*> vr;
-			vr.clear();
-			vr.reserve(numOfSquares);
-			for (int i = 0; i < numOfColumns; ++i)
+			for (int i = 0; i < num_of_columns; ++i)
 			{
-				for (int j = 0; j < numOfRows; ++j)
+				for (int j = 0; j < num_of_rows; ++j)
 				{
-					int x = tileW2 * i + seam2 + 10;
-					int y = tileL2 * j + seam2 + 60;
-					Graph_lib::Rectangle* r = new Graph_lib::Rectangle(Point(x, y), tileW2, tileL2);
+					int x = (tile_draw_width * i) + seam2 + 10;
+					int y = (tile_draw_lenght * j) + seam2 + 60;
+
+					int x2 = (tile_draw_width * (1 + i)) + 10;
+					int y2 = (tile_draw_lenght * (1 + j)) + 60;
+
+					Graph_lib::Rectangle* r = new Graph_lib::Rectangle(Point{ x, y }, Point{ x2, y2 });
 					// fill the consequtive squares with white or green color
 					if ((i + j) % 2 == 0)
 					{
 						r->set_fill_color(Color::dark_green);
 					}
 					else r->set_color(Color::white);
-					vr.push_back(r);
+					vk.push_back(r);
 				}
 			}
-			for (size_t k = 0; k < vr.size(); ++k) attach(*vr[k]);
+			for (size_t k = 0; k < vk.size(); ++k) attach(*vk[k]);
 		}
 	}
 	//after click horizontal button
@@ -266,8 +293,8 @@ private:
 		ostringstream ss3;
 		ss3 << hor_tile_cost << '$';
 		all_tile_cost.put(ss3.str());
-
-		draw(1, tile.seam);
+		
+		draw(1, tile.seam, tile.tile_length, tile.tile_width);
 
 		redraw();
 	}
@@ -301,10 +328,11 @@ private:
 		ss3 << ver_tile_cost << '$';
 		all_tile_cost.put(ss3.str());
 		
-		draw(2, tile.seam);
+		draw(2, tile.seam, tile.tile_length, tile.tile_width);
 
 		redraw();
 	}
+
 };
 
 Room_with_tile_window::Room_with_tile_window(Point xy, int w, int h, const string& title)
@@ -345,7 +373,7 @@ Room_with_tile_window::Room_with_tile_window(Point xy, int w, int h, const strin
 
 		tile_length_box{ Point{100, 30}, 50, 20, "Tile lenght, m:" },
 		tile_width_box{ Point{x_max() -550, 30}, 50, 20, "Tile width, m:" },
-		tile_seam_box{ Point{x_max() - 350, 30}, 50, 20, "Tile seam, m:" },
+		tile_seam_box{ Point{x_max() - 350, 30}, 50, 20, "Tile seam, mm:" },
 		tile_cost_box{ Point{x_max() -200, 30}, 50, 20, "Tile cost, $:" },
 	
 		tile_amount{ Point{x_max() -70, 180}, 50, 20, "Tile amount:" },
