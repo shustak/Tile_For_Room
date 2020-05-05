@@ -177,18 +177,11 @@ private:
 	void draw(int par, double seam_d, double tile_d_l, double tile_d_w)
 	{	//set scale
 		double scale;
-
 		double scale_x = 600 / (room.length*100);
 		double scale_y = 500 / (room.width*100);
+		if (scale_x > scale_y){scale = scale_y;}
+		if (scale_x <= scale_y){scale = scale_x;}
 
-		if (scale_x > scale_y)
-		{
-			scale = scale_y;
-		}
-		if (scale_x <= scale_y)
-		{
-			scale = scale_x;
-		}
 		//calculate tile draw values depending on the scale
 		int tile_draw_lenght = int(tile_d_l * 100 * scale);
 		int tile_draw_width = int(tile_d_w * 100 * scale);
